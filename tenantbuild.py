@@ -1,0 +1,105 @@
+# list of packages that should be imported for this code to work
+import cobra.mit.access
+import cobra.mit.request
+import cobra.mit.session
+import cobra.model.fv
+import cobra.model.ip
+import cobra.model.l3ext
+import cobra.model.pol
+import cobra.model.vns
+import cobra.model.vz
+from cobra.internal.codec.xmlcodec import toXMLStr
+
+# log into an APIC and create a directory object
+ls = cobra.mit.session.LoginSession('https://1.1.1.1', 'admin', 'password')
+md = cobra.mit.access.MoDirectory(ls)
+md.login()
+
+# the top level object on which operations will be made
+polUni = cobra.model.pol.Uni('')
+
+# build the request using cobra syntax
+fvTenant = cobra.model.fv.Tenant(polUni, ownerKey=u'', name=u'Heroes', descr=u'', nameAlias=u'', ownerTag=u'')
+vnsSvcCont = cobra.model.vns.SvcCont(fvTenant)
+l3extOut = cobra.model.l3ext.Out(fvTenant, ownerKey=u'', name=u'Heroes_external_corporate', descr=u'', targetDscp=u'unspecified', enforceRtctrl=u'export', nameAlias=u'', ownerTag=u'')
+l3extRsL3DomAtt = cobra.model.l3ext.RsL3DomAtt(l3extOut, tDn=u'uni/l3dom-Heroes_external_corporate')
+l3extRsEctx = cobra.model.l3ext.RsEctx(l3extOut, tnFvCtxName=u'Heroes_Only')
+l3extLNodeP = cobra.model.l3ext.LNodeP(l3extOut, ownerKey=u'', name=u'borderleaf_2_corporate', descr=u'', targetDscp=u'unspecified', tag=u'yellow-green', nameAlias=u'', ownerTag=u'')
+l3extRsNodeL3OutAtt = cobra.model.l3ext.RsNodeL3OutAtt(l3extLNodeP, rtrIdLoopBack=u'yes', rtrId=u'10.1.100.2', tDn=u'topology/pod-1/node-102')
+ipRouteP = cobra.model.ip.RouteP(l3extRsNodeL3OutAtt, rtCtrl=u'', name=u'', descr=u'', ip=u'0.0.0.0/0', pref=u'1', nameAlias=u'', aggregate=u'no')
+ipNexthopP = cobra.model.ip.NexthopP(ipRouteP, name=u'', descr=u'', pref=u'unspecified', nhAddr=u'10.1.2.2', nameAlias=u'', type=u'prefix')
+l3extLIfP = cobra.model.l3ext.LIfP(l3extLNodeP, ownerKey=u'', name=u'borderleaf_2', descr=u'', tag=u'yellow-green', nameAlias=u'', ownerTag=u'')
+l3extRsPathL3OutAtt = cobra.model.l3ext.RsPathL3OutAtt(l3extLIfP, addr=u'10.1.200.3/31', descr=u'', encapScope=u'local', targetDscp=u'unspecified', llAddr=u'::', mac=u'00:22:BD:F8:19:FF', mode=u'regular', encap=u'unknown', ifInstT=u'l3-port', mtu=u'inherit', tDn=u'topology/pod-1/paths-102/pathep-[eth1/47]')
+l3extRsNdIfPol = cobra.model.l3ext.RsNdIfPol(l3extLIfP, tnNdIfPolName=u'')
+l3extRsIngressQosDppPol = cobra.model.l3ext.RsIngressQosDppPol(l3extLIfP, tnQosDppPolName=u'')
+l3extRsEgressQosDppPol = cobra.model.l3ext.RsEgressQosDppPol(l3extLIfP, tnQosDppPolName=u'')
+l3extLNodeP2 = cobra.model.l3ext.LNodeP(l3extOut, ownerKey=u'', name=u'borderleaf_1_corporate', descr=u'', targetDscp=u'unspecified', tag=u'yellow-green', nameAlias=u'', ownerTag=u'')
+l3extRsNodeL3OutAtt2 = cobra.model.l3ext.RsNodeL3OutAtt(l3extLNodeP2, rtrIdLoopBack=u'yes', rtrId=u'10.1.100.1', tDn=u'topology/pod-1/node-101')
+ipRouteP2 = cobra.model.ip.RouteP(l3extRsNodeL3OutAtt2, rtCtrl=u'', name=u'', descr=u'', ip=u'0.0.0.0/0', pref=u'1', nameAlias=u'', aggregate=u'no')
+ipNexthopP2 = cobra.model.ip.NexthopP(ipRouteP2, name=u'', descr=u'', pref=u'unspecified', nhAddr=u'10.1.200.0', nameAlias=u'', type=u'prefix')
+l3extLIfP2 = cobra.model.l3ext.LIfP(l3extLNodeP2, ownerKey=u'', name=u'borderleaf_1', descr=u'', tag=u'yellow-green', nameAlias=u'', ownerTag=u'')
+l3extRsPathL3OutAtt2 = cobra.model.l3ext.RsPathL3OutAtt(l3extLIfP2, addr=u'10.1.200.1/31', descr=u'', encapScope=u'local', targetDscp=u'unspecified', llAddr=u'::', mac=u'00:22:BD:F8:19:FF', mode=u'regular', encap=u'unknown', ifInstT=u'l3-port', mtu=u'inherit', tDn=u'topology/pod-1/paths-101/pathep-[eth1/47]')
+l3extRsNdIfPol2 = cobra.model.l3ext.RsNdIfPol(l3extLIfP2, tnNdIfPolName=u'')
+l3extRsIngressQosDppPol2 = cobra.model.l3ext.RsIngressQosDppPol(l3extLIfP2, tnQosDppPolName=u'')
+l3extRsEgressQosDppPol2 = cobra.model.l3ext.RsEgressQosDppPol(l3extLIfP2, tnQosDppPolName=u'')
+l3extInstP = cobra.model.l3ext.InstP(l3extOut, matchT=u'AtleastOne', name=u'Heroes_default', prio=u'unspecified', targetDscp=u'unspecified', prefGrMemb=u'exclude', nameAlias=u'', descr=u'')
+l3extSubnet = cobra.model.l3ext.Subnet(l3extInstP, name=u'', descr=u'', ip=u'0.0.0.0/0', nameAlias=u'', aggregate=u'')
+fvRsCustQosPol = cobra.model.fv.RsCustQosPol(l3extInstP, tnQosCustomPolName=u'')
+fvRsCons = cobra.model.fv.RsCons(l3extInstP, tnVzBrCPName=u'power_up', prio=u'unspecified')
+fvRsCons2 = cobra.model.fv.RsCons(l3extInstP, tnVzBrCPName=u'web', prio=u'unspecified')
+fvCtx = cobra.model.fv.Ctx(fvTenant, ownerKey=u'', bdEnforcedEnable=u'no', descr=u'', knwMcastAct=u'permit', pcEnfDir=u'ingress', nameAlias=u'', ownerTag=u'', pcEnfPref=u'enforced', name=u'Test_VRF')
+vzAny = cobra.model.vz.Any(fvCtx, prefGrMemb=u'disabled', matchT=u'AtleastOne', name=u'', descr=u'', nameAlias=u'')
+fvRsOspfCtxPol = cobra.model.fv.RsOspfCtxPol(fvCtx, tnOspfCtxPolName=u'')
+fvRsCtxToEpRet = cobra.model.fv.RsCtxToEpRet(fvCtx, tnFvEpRetPolName=u'')
+fvRsCtxToExtRouteTagPol = cobra.model.fv.RsCtxToExtRouteTagPol(fvCtx, tnL3extRouteTagPolName=u'')
+fvRsBgpCtxPol = cobra.model.fv.RsBgpCtxPol(fvCtx, tnBgpCtxPolName=u'default')
+fvCtx2 = cobra.model.fv.Ctx(fvTenant, ownerKey=u'', bdEnforcedEnable=u'no', descr=u'', knwMcastAct=u'permit', pcEnfDir=u'ingress', nameAlias=u'', ownerTag=u'', pcEnfPref=u'enforced', name=u'Heroes_Only')
+vzAny2 = cobra.model.vz.Any(fvCtx2, prefGrMemb=u'disabled', matchT=u'AtleastOne', name=u'', descr=u'', nameAlias=u'')
+fvRsOspfCtxPol2 = cobra.model.fv.RsOspfCtxPol(fvCtx2, tnOspfCtxPolName=u'')
+fvRsCtxToEpRet2 = cobra.model.fv.RsCtxToEpRet(fvCtx2, tnFvEpRetPolName=u'')
+fvRsCtxToExtRouteTagPol2 = cobra.model.fv.RsCtxToExtRouteTagPol(fvCtx2, tnL3extRouteTagPolName=u'')
+fvRsBgpCtxPol2 = cobra.model.fv.RsBgpCtxPol(fvCtx2, tnBgpCtxPolName=u'')
+fvBD = cobra.model.fv.BD(fvTenant, multiDstPktAct=u'bd-flood', mcastAllow=u'no', limitIpLearnToSubnets=u'yes', unicastRoute=u'yes', unkMcastAct=u'flood', descr=u'', llAddr=u'::', nameAlias=u'', type=u'regular', ipLearning=u'yes', vmac=u'not-applicable', mac=u'00:22:BD:F8:19:FF', epMoveDetectMode=u'', ownerTag=u'', intersiteBumTrafficAllow=u'no', ownerKey=u'', name=u'Test_BD', epClear=u'no', unkMacUcastAct=u'proxy', arpFlood=u'no', intersiteL2Stretch=u'no', OptimizeWanBandwidth=u'no')
+fvRsIgmpsn = cobra.model.fv.RsIgmpsn(fvBD, tnIgmpSnoopPolName=u'')
+fvRsCtx = cobra.model.fv.RsCtx(fvBD, tnFvCtxName=u'Test_VRF')
+fvRsBdToEpRet = cobra.model.fv.RsBdToEpRet(fvBD, resolveAct=u'resolve', tnFvEpRetPolName=u'')
+fvRsBDToNdP = cobra.model.fv.RsBDToNdP(fvBD, tnNdIfPolName=u'')
+fvBD2 = cobra.model.fv.BD(fvTenant, multiDstPktAct=u'bd-flood', mcastAllow=u'no', limitIpLearnToSubnets=u'yes', unicastRoute=u'yes', unkMcastAct=u'flood', descr=u'', llAddr=u'::', nameAlias=u'', type=u'regular', ipLearning=u'yes', vmac=u'not-applicable', mac=u'00:22:BD:F8:19:FF', epMoveDetectMode=u'', ownerTag=u'', intersiteBumTrafficAllow=u'no', ownerKey=u'', name=u'Hero_Land', epClear=u'no', unkMacUcastAct=u'proxy', arpFlood=u'no', intersiteL2Stretch=u'no', OptimizeWanBandwidth=u'no')
+fvSubnet = cobra.model.fv.Subnet(fvBD2, name=u'', descr=u'', ctrl=u'', ip=u'192.168.120.1/22', preferred=u'no', virtual=u'no', nameAlias=u'')
+fvSubnet2 = cobra.model.fv.Subnet(fvBD2, name=u'', descr=u'', ctrl=u'', ip=u'10.1.120.1/22', preferred=u'no', virtual=u'no', nameAlias=u'')
+fvRsIgmpsn2 = cobra.model.fv.RsIgmpsn(fvBD2, tnIgmpSnoopPolName=u'')
+fvRsCtx2 = cobra.model.fv.RsCtx(fvBD2, tnFvCtxName=u'Heroes_Only')
+fvRsBdToEpRet2 = cobra.model.fv.RsBdToEpRet(fvBD2, resolveAct=u'resolve', tnFvEpRetPolName=u'')
+fvRsBDToNdP2 = cobra.model.fv.RsBDToNdP(fvBD2, tnNdIfPolName=u'')
+fvRsTenantMonPol = cobra.model.fv.RsTenantMonPol(fvTenant, tnMonEPGPolName=u'')
+fvAp = cobra.model.fv.Ap(fvTenant, ownerKey=u'', name=u'Save_The_Planet', prio=u'unspecified', descr=u'', nameAlias=u'', ownerTag=u'')
+fvAEPg = cobra.model.fv.AEPg(fvAp, isAttrBasedEPg=u'no', matchT=u'AtleastOne', name=u'app', descr=u'', fwdCtrl=u'', prefGrMemb=u'exclude', nameAlias=u'', prio=u'unspecified', pcEnfPref=u'unenforced')
+fvRsProv = cobra.model.fv.RsProv(fvAEPg, tnVzBrCPName=u'power_up', matchT=u'AtleastOne', prio=u'unspecified')
+fvRsPathAtt = cobra.model.fv.RsPathAtt(fvAEPg, tDn=u'topology/pod-1/protpaths-101-102/pathep-[Heroes_FI-2B]', descr=u'', primaryEncap=u'unknown', instrImedcy=u'lazy', mode=u'regular', encap=u'vlan-201')
+fvRsPathAtt2 = cobra.model.fv.RsPathAtt(fvAEPg, tDn=u'topology/pod-1/protpaths-101-102/pathep-[Heroes_FI-2A]', descr=u'', primaryEncap=u'unknown', instrImedcy=u'lazy', mode=u'regular', encap=u'vlan-201')
+fvRsDomAtt = cobra.model.fv.RsDomAtt(fvAEPg, tDn=u'uni/phys-Heroes_phys', netflowDir=u'both', epgCos=u'Cos0', classPref=u'encap', primaryEncap=u'unknown', delimiter=u'', instrImedcy=u'lazy', resImedcy=u'lazy', encap=u'unknown', encapMode=u'auto', netflowPref=u'disabled', epgCosPref=u'disabled')
+fvRsCons3 = cobra.model.fv.RsCons(fvAEPg, tnVzBrCPName=u'sql', prio=u'unspecified')
+fvRsCustQosPol2 = cobra.model.fv.RsCustQosPol(fvAEPg, tnQosCustomPolName=u'')
+fvRsBd = cobra.model.fv.RsBd(fvAEPg, tnFvBDName=u'Hero_Land')
+fvAEPg2 = cobra.model.fv.AEPg(fvAp, isAttrBasedEPg=u'no', matchT=u'AtleastOne', name=u'db', descr=u'', fwdCtrl=u'', prefGrMemb=u'exclude', nameAlias=u'', prio=u'unspecified', pcEnfPref=u'unenforced')
+fvRsProv2 = cobra.model.fv.RsProv(fvAEPg2, tnVzBrCPName=u'sql', matchT=u'AtleastOne', prio=u'unspecified')
+fvRsPathAtt3 = cobra.model.fv.RsPathAtt(fvAEPg2, tDn=u'topology/pod-1/protpaths-101-102/pathep-[Heroes_FI-2A]', descr=u'', primaryEncap=u'unknown', instrImedcy=u'lazy', mode=u'regular', encap=u'vlan-202')
+fvRsPathAtt4 = cobra.model.fv.RsPathAtt(fvAEPg2, tDn=u'topology/pod-1/protpaths-101-102/pathep-[Heroes_FI-2B]', descr=u'', primaryEncap=u'unknown', instrImedcy=u'lazy', mode=u'regular', encap=u'vlan-202')
+fvRsDomAtt2 = cobra.model.fv.RsDomAtt(fvAEPg2, tDn=u'uni/phys-Heroes_phys', netflowDir=u'both', epgCos=u'Cos0', classPref=u'encap', primaryEncap=u'unknown', delimiter=u'', instrImedcy=u'lazy', resImedcy=u'lazy', encap=u'unknown', encapMode=u'auto', netflowPref=u'disabled', epgCosPref=u'disabled')
+fvRsCustQosPol3 = cobra.model.fv.RsCustQosPol(fvAEPg2, tnQosCustomPolName=u'')
+fvRsBd2 = cobra.model.fv.RsBd(fvAEPg2, tnFvBDName=u'Hero_Land')
+fvAEPg3 = cobra.model.fv.AEPg(fvAp, isAttrBasedEPg=u'no', matchT=u'AtleastOne', name=u'web', descr=u'', fwdCtrl=u'', prefGrMemb=u'exclude', nameAlias=u'', prio=u'unspecified', pcEnfPref=u'unenforced')
+fvRsProv3 = cobra.model.fv.RsProv(fvAEPg3, tnVzBrCPName=u'web', matchT=u'AtleastOne', prio=u'unspecified')
+fvRsPathAtt5 = cobra.model.fv.RsPathAtt(fvAEPg3, tDn=u'topology/pod-1/protpaths-101-102/pathep-[Heroes_FI-2B]', descr=u'', primaryEncap=u'unknown', instrImedcy=u'lazy', mode=u'regular', encap=u'vlan-200')
+fvRsPathAtt6 = cobra.model.fv.RsPathAtt(fvAEPg3, tDn=u'topology/pod-1/protpaths-101-102/pathep-[Heroes_FI-2A]', descr=u'', primaryEncap=u'unknown', instrImedcy=u'lazy', mode=u'regular', encap=u'vlan-200')
+fvRsDomAtt3 = cobra.model.fv.RsDomAtt(fvAEPg3, tDn=u'uni/phys-Heroes_phys', netflowDir=u'both', epgCos=u'Cos0', classPref=u'encap', primaryEncap=u'unknown', delimiter=u'', instrImedcy=u'lazy', resImedcy=u'lazy', encap=u'unknown', encapMode=u'auto', netflowPref=u'disabled', epgCosPref=u'disabled')
+fvRsCons4 = cobra.model.fv.RsCons(fvAEPg3, tnVzBrCPName=u'sql', prio=u'unspecified')
+fvRsCustQosPol4 = cobra.model.fv.RsCustQosPol(fvAEPg3, tnQosCustomPolName=u'')
+fvRsBd3 = cobra.model.fv.RsBd(fvAEPg3, tnFvBDName=u'Hero_Land')
+
+
+# commit the generated code to APIC
+print toXMLStr(polUni)
+c = cobra.mit.request.ConfigRequest()
+c.addMo(polUni)
+md.commit(c)
